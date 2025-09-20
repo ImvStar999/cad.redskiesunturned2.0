@@ -4,24 +4,24 @@ FROM node:18
 # Set working directory
 WORKDIR /snailycad
 
-# Install system dependencies (OpenSSL for Prisma)
+# Install system dependencies (fix for Prisma + OpenSSL)
 RUN apt-get update -y && apt-get install -y openssl
 
-# Copy all files into container
+# Copy all files
 COPY . .
 
 # Enable corepack and install pnpm
 RUN corepack enable
 RUN corepack prepare pnpm@latest --activate
 
-# Install project dependencies
+# Install dependencies
 RUN pnpm install
 
-# Build the project (includes all packages like @snailycad/ui)
+# Build the app (includes frontend and backend)
 RUN pnpm build
 
-# Expose the port SnailyCAD runs on (adjust if different)
+# Expose the app port (SnailyCAD default is 3000)
 EXPOSE 3000
 
-# Start the app in production mode
+# Run the app in production
 CMD ["pnpm", "start"]
