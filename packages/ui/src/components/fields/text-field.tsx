@@ -2,7 +2,7 @@ import * as React from "react";
 import { useTextField } from "@react-aria/textfield";
 import { mergeProps, useObjectRef } from "@react-aria/utils";
 import { AriaTextFieldProps } from "@react-types/textfield";
-import { cn } from "../utils/cn"; // Make sure this path is correct
+import { cn } from "../utils/cn"; // ✅ Adjust path if needed
 
 interface Props extends AriaTextFieldProps<"textarea" | "input"> {
   inputElementType: "textarea" | "input";
