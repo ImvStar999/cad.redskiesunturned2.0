@@ -1,34 +1,23 @@
-// src/components/fields/text-field.tsx
-import React, { forwardRef } from 'react';
-import { cn } from '../utils/cn';
+import React from "react";
+import { cn } from "../utils/cn";
 
-type TextFieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
-  textarea?: boolean;
+interface TextFieldProps {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
   className?: string;
-};
+}
 
-const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, TextFieldProps>(
-  ({ textarea, className, ...props }, ref) => {
-    if (textarea) {
-      return (
-        <textarea
-          {...(props as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
-          ref={ref as React.Ref<HTMLTextAreaElement>}
-          className={cn('textarea-class', className)}
-        />
-      );
-    }
-
-    return (
+export function TextField({ label, value, onChange, className }: TextFieldProps) {
+  return (
+    <label className={cn("text-field", className)}>
+      <span>{label}</span>
       <input
-        {...(props as React.InputHTMLAttributes<HTMLInputElement>)}
-        ref={ref as React.Ref<HTMLInputElement>}
-        className={cn('input-class', className)}
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="input"
       />
-    );
-  },
-);
-
-TextField.displayName = 'TextField';
-
-export default TextField;
+    </label>
+  );
+}
