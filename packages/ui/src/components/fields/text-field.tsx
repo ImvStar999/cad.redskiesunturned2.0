@@ -1,14 +1,12 @@
 import * as React from "react";
 import { useTextField } from "@react-aria/textfield";
-import { mergeProps } from "@react-aria/utils";
-import { useObjectRef } from "@react-aria/utils";
+import { mergeProps, useObjectRef } from "@react-aria/utils";
 import { AriaTextFieldProps } from "@react-types/textfield";
-import { cn } from "utils/cn"; // Adjust this import if your utils path is different
+import { cn } from "../utils/cn"; // Make sure this path is correct
 
 interface Props extends AriaTextFieldProps<"textarea" | "input"> {
   inputElementType: "textarea" | "input";
   label: React.ReactNode;
-  isTextarea?: boolean;
   isOptional?: boolean;
   className?: string;
   labelClassnames?: string;
@@ -26,18 +24,19 @@ export function TextField(props: Props) {
     ...rest
   } = props;
 
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const ref = useObjectRef(
-    React.useRef<HTMLInputElement | HTMLTextAreaElement>(null)
+    inputElementType === "textarea" ? textareaRef : inputRef
   );
 
-  const { labelProps, inputProps, descriptionProps, errorMessageProps } =
-    useTextField(
-      {
-        ...rest,
-        inputElementType,
-      },
-      ref
-    );
+  const { labelProps, inputProps, errorMessageProps } = useTextField(
+    {
+      ...rest,
+      inputElementType,
+    },
+    ref
+  );
 
   const InputTag = inputElementType;
 
@@ -56,11 +55,11 @@ export function TextField(props: Props) {
         aria-errormessage={errorMessage ? "error-msg" : undefined}
       />
 
-      {errorMessage ? (
+      {errorMessage && (
         <p {...errorMessageProps} id="error-msg" className="text-red-500 text-sm">
           {errorMessage}
         </p>
-      ) : null}
+      )}
     </div>
   );
 }
