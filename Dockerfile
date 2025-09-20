@@ -1,19 +1,27 @@
-# Dockerfile
-FROM node:18-slim AS base
+# Use Node 18 base image
+FROM node:18
 
+# Set working directory
 WORKDIR /snailycad
 
-# Install pnpm globally
-RUN npm install -g pnpm
+# Install system dependencies (OpenSSL for Prisma)
+RUN apt-get update -y && apt-get install -y openssl
 
-# Copy code
+# Copy all files into container
 COPY . .
 
-# Install dependencies
+# Enable corepack and install pnpm
+RUN corepack enable
+RUN corepack prepare pnpm@latest --activate
+
+# Install project dependencies
 RUN pnpm install
 
-# Build everything
+# Build the project (includes all packages like @snailycad/ui)
 RUN pnpm build
 
-# Run production server (frontend + API together)
-CMD ["pnpm", "start:prod"]
+# Expose the port SnailyCAD runs on (adjust if different)
+EXPOSE 3000
+
+# Start the app in production mode
+CMD ["pnpm", "start"]
