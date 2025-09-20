@@ -1,60 +1,66 @@
 import * as React from "react";
-import { type AriaTextFieldOptions, type TextFieldAria, useTextField } from "@react-aria/textfield";
-import { cn } from "mxcn";
-import { Input } from "../inputs/input";
-import { Textarea } from "../inputs/textarea";
-import { ErrorMessage } from "../error-message";
-import { Label } from "../label";
-import { PasswordInputButton } from "../inputs/password-input-button";
+import { useTextField } from "@react-aria/textfield";
+import { mergeProps } from "@react-aria/utils";
+import { useObjectRef } from "@react-aria/utils";
+import { AriaTextFieldProps } from "@react-types/textfield";
+import { cn } from "utils/cn"; // Adjust this import if your utils path is different
 
-interface Props extends AriaTextFieldOptions<"input"> {
+interface Props extends AriaTextFieldProps<"textarea" | "input"> {
+  inputElementType: "textarea" | "input";
   label: React.ReactNode;
   isTextarea?: boolean;
   isOptional?: boolean;
-
   className?: string;
   labelClassnames?: string;
   errorMessage?: string | null;
-  name?: string;
-  children?: React.ReactNode;
-  inputRef?: React.RefObject<HTMLInputElement>;
 }
 
 export function TextField(props: Props) {
-  const _ref = React.useRef<HTMLInputElement | HTMLTextAreaElement>(null);
-  const ref = props.inputRef ?? _ref;
+  const {
+    label,
+    isOptional,
+    className,
+    labelClassnames,
+    errorMessage,
+    inputElementType,
+    ...rest
+  } = props;
 
-  const { labelProps, inputProps, errorMessageProps } = useTextField(
-    { ...props, inputElementType: props.isTextarea ? "textarea" : "input" },
-    ref,
+  const ref = useObjectRef(
+    React.useRef<HTMLInputElement | HTMLTextAreaElement>(null)
   );
 
+  const { labelProps, inputProps, descriptionProps, errorMessageProps } =
+    useTextField(
+      {
+        ...rest,
+        inputElementType,
+      },
+      ref
+    );
+
+  const InputTag = inputElementType;
+
   return (
-    <div className={cn("relative text-field flex flex-col mb-3", props.className)}>
-      <Label {...props} labelProps={labelProps} />
+    <div className={cn("flex flex-col", className)}>
+      <label {...labelProps} className={labelClassnames}>
+        {label}{" "}
+        {isOptional && <span className="text-neutral-500">(optional)</span>}
+      </label>
 
-      {props.isTextarea ? (
-        <Textarea
-          errorMessage={props.errorMessage}
-          ref={ref as React.RefObject<HTMLTextAreaElement>}
-          {...(inputProps as TextFieldAria<"textarea">["inputProps"])}
-        />
-      ) : (
-        <Input
-          errorMessage={props.errorMessage}
-          ref={ref as React.RefObject<HTMLInputElement>}
-          {...(inputProps as TextFieldAria["inputProps"])}
-        />
-      )}
-      {props.children}
+      <InputTag
+        {...mergeProps(inputProps, rest)}
+        ref={ref}
+        className="input input-bordered w-full"
+        aria-invalid={!!errorMessage}
+        aria-errormessage={errorMessage ? "error-msg" : undefined}
+      />
 
-      {props.type === "password" && !props.isTextarea ? (
-        <PasswordInputButton inputRef={ref as React.RefObject<HTMLInputElement>} />
+      {errorMessage ? (
+        <p {...errorMessageProps} id="error-msg" className="text-red-500 text-sm">
+          {errorMessage}
+        </p>
       ) : null}
-
-      {props.errorMessage && (
-        <ErrorMessage errorMessage={props.errorMessage} errorMessageProps={errorMessageProps} />
-      )}
     </div>
   );
 }
